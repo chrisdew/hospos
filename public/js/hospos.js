@@ -1,6 +1,6 @@
 $(function() {
 	console.log("DOM loaded");
-	$('#itemInput').keyup(function(e) {
+	$('#ng_view').on('keyup', '#itemInput', function(e) {
 		console.log("keyup", e);
 		window.itemInputOnKeyUp(e);
 	});
@@ -27,11 +27,11 @@ function CartCtrl($scope, $http) {
 	$scope.itemQty = 1;
 	
 	$scope.invoiceSubtotal = function() {
-		return _.foldl($scope.items, function(memo, item) { return item.salprc_u * item.qty + memo; }, 0)
+		return _.foldl($scope.items, function(memo, item) { return item.salprc_u * item.qty + memo; }, 0);
 	}
 
 	$scope.invoiceVat = function() {
-		return _.foldl($scope.items, function(memo, item) { return (item.salprc_e - item.salprc_u) * item.qty + memo; }, 0)
+		return _.foldl($scope.items, function(memo, item) { return (item.salprc_e - item.salprc_u) * item.qty + memo; }, 0);
 	}
 	
 	$scope.invoiceTotal = function() {
@@ -67,7 +67,7 @@ function CartCtrl($scope, $http) {
     window.itemInputOnKeyUp = function(e) {
     	console.log("itemInputOnKeyUp", e);
     	$scope.$apply(function() {
-    		if (e.keyCode === 13) { // enter
+    		if (e.keyCode === 13 && $scope.itemInput.length > 3) { // enter
 console.log("DEBUG");
                 if (!$scope.validItem) {
                 	$scope.lookup();
@@ -170,6 +170,10 @@ function StockCtrl($scope, $http, $rootScope) {
     $scope.select = function(item) {
     	$rootScope.$broadcast('selectedStockItem', item);
     }
+}
+
+
+function PaymentCtrl($scope, $http) {
 }
 
 

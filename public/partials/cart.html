@@ -1,0 +1,90 @@
+
+<div class="row">
+  <div class="span5">
+    <div ng-controller="StockGroupCtrl" id="stock_group_control">
+      <div class="bordered_box">
+        <div>Stock Groups</div>
+        <div class="ilb" ng-repeat="group in groups">
+          <button class="touch" ng-click="select(group.prod_grp)">{{group.prod_grp}} {{group.desc}}</button>
+        </div>
+      </div>
+    </div>
+
+    <div ng-controller="StockSubgroupCtrl">
+      <div class="bordered_box" ng-hide="subgroups.length == 0">
+        <div>Subgroups</div>
+        <div class="ilb" ng-repeat="subgroup in subgroups">
+          <button class="touch" ng-click="select(subgroup.prod_grp, subgroup.smsgr_id)">{{subgroup.smsgr_id}} {{subgroup.desc}}</button>
+        </div>
+      </div>
+    </div>
+
+    <div ng-controller="StockCtrl">
+      <div class="bordered_box">
+        <div>Stock Items</div>
+        <div class="ilb" ng-repeat="item in items">        
+          <button class="touch" ng-click="select(item)">{{item.key1p2}} {{item.desc1}}</button>
+        </div>
+        <div ng-show="items.length == 0">
+          No items match your current search.  Try pressing a 'Stock Group' or 'Subgroup'.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="span7">
+    <div ng-controller="CartCtrl">
+      <div class="bordered_box">
+        <form ng-submit="addItem()">
+          <table style="width: 100%;">
+            <tr>
+              <th class="left">Stock Code</th>
+              <th class="left">Description</th>
+              <th class="right">Quantity</th>
+              <th class="right">Unit Price</th>
+              <th class="right">Price</th>
+            </tr>
+            <tr ng-repeat="item in items">
+              <td>{{item.key1p2}}</td>
+              <td>{{item.desc1}}</td>
+              <td class="right">{{item.qty}}</td>
+              <td class="right">£{{item.salprc_u / 100}}</td>
+              <td class="right">£{{item.lineTotal() / 100}}</td>
+            </tr>
+            <tr>
+              <td colspan="1" id="itemInputTd">
+                <input autofocus id="itemInput" type="text" ng-model="itemInput" size="8" placeholder="add new item here">
+              </td>
+              <td>
+                <span>{{validItem.desc1}}</span>
+              <td class="right">
+                <input type="number" class="small" ng-model="itemQty" size="8" placeholder="qty">
+              </td>
+              <td class="right">
+                <span ng-show="validItem">£{{validItem.salprc_u / 100}}</span>
+              </td>
+              <td>
+                <input ng-show="validItem" class="btn-primary" type="submit" value="add">
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3">&nbsp;</td>
+              <td class="right">Subtotal:</td>
+              <td class="right">£{{invoiceSubtotal() / 100;}}</td>
+            </tr>
+            <tr>
+              <td colspan="3">&nbsp;</td>
+              <td class="right">VAT:</td>
+              <td class="right">£{{invoiceVat() / 100;}}</td>
+            </tr>
+            <tr>
+              <td colspan="3">&nbsp;</td>
+              <td class="right">Total Payable:</td>
+              <td class="right overlined">£{{invoiceTotal() / 100;}}</td>
+            </tr>
+          </table>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

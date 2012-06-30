@@ -1,0 +1,57 @@
+
+
+/* ===== Primary Styles ========================================================
+   Author:
+   ========================================================================== */
+
+
+
+
+
+
+
+input.small {
+  width: 50px;
+}
+input.medium {
+  width: 50px;
+}
+.left {
+  text-align: left;
+}
+.right {
+  text-align: right;
+}
+
+
+div.bordered_box {
+    border: 1px solid #ddd;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 20px;
+    -webkit-box-shadow: 5px 5px 5px #ddd;
+    -moz-box-shadow: 5px 5px 5px #ddd;
+    -ms-box-shadow: 5px 5px 5px #ddd;
+    box-shadow: 5px 5px 5px #ddd;
+}
+
+.ilb {
+	display: inline-block;
+}
+
+button.touch {
+	width: 64px;
+	height: 64px;
+	display: inline-block;
+	margin: 3px;
+}
+
+
+
+
+
+
+

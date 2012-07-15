@@ -43,7 +43,7 @@ function CartCtrl($scope, $http, $rootScope) {
 	}
 	
 	$scope.select = function(item) {
-		$rootScope.$broadcast('selectedStockItem', item);
+		$rootScope.$broadcast('selectedStockItem2', item);
 		$scope.picklist = null;
 	}
 
@@ -114,6 +114,11 @@ console.log("DEBUG");
 
 	$scope.$on('selectedStockItem', function(e, item) {
 		$scope.addItemToCart(item, 1);
+	});
+	$scope.$on('selectedStockItem2', function(e, item) {
+		$('#itemInput').focus();
+		$scope.validItem = item;
+		$scope.itemInput = item.key1p2;
 	});
 }
 

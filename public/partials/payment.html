@@ -1,7 +1,73 @@
 
+
 <div class="row">
-  <div class="span5">
-    <div ng-controller="PaymentCtrl" id="payment_control">
+  <div class="span4">
+    <div ng-controller="PaymentTypeCtrl" id="payment_type_control">
+      <div class="bordered_box">
+        <div>Payment Types:</div>
+        <div class="ilb" ng-repeat="type in types">
+          <button class="touch" ng-click="select(type)">{{type.name}}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="span8">
+    <div ng-controller="PaymentCtrl">
+      <div class="bordered_box">
+        <form name="form" ng-submit="addItem()">
+          <table style="width: 100%;">
+            <tr>
+              <th class="left">Payment Type</th>
+              <th colspan="2" class="left">Details</th>
+              <th class="right">Payment</th>
+            </tr>
+            <tr>
+              <td>Cash</td>
+              <td class="right">Tendered: £&nbsp;
+	            <input type="text" autofocus class="small" on-keyup-enter-fn render-on-blur on-blur="cashTenderedBlur()" ng-model="cash.tendered" name="cash_tendered" currency />
+              </td>
+              <td class="right">Change: £&nbsp;
+                <input class="small" type="text" on-keyup-enter-fn on-blur="cashChangeBlur()" ng-model="cash.change" name="cash_change" currency />
+              </td>
+              <td class="right">£{{cash.amount()|currency}}</td>
+            </tr>
+            <tr>
+              <td>Card</td>
+              <td colspan="2" class="right">
+                <span ng-show="card.info">{{card.info}}</span>
+                <span ng-show="card.warning">{{card.warning}}</span>
+                <span ng-show="card.cardNo">Card No.: {{card.cardNo}}</span>
+                <span ng-show="card.expDate">Expiry Date: {{card.expDate}}</span>
+              </td>
+              <td class="right">£&nbsp;<input on-keyup-enter-fn="cardOnKeyupEnter" class="small" type="text" ng-model="card.amount" size="8" name="card_amount" currency></td>
+            </tr>
+            <tr>
+              <td colspan="3">Cheque</td>
+              <td class="right">£&nbsp;<input class="small" on-keyup-enter-fn type="text" ng-model="cheque.amount" size="8" name="cheque_amount" currency></td>
+            </tr>
+            <tr>
+              <th colspan="3" class="right">Total Payments</th>
+              <td class="right">£{{paymentTotal()|currency}}</td>
+            </tr>
+            <tr>
+              <th colspan="3" class="right">Total To Pay</th>
+              <td class="right">£{{totalToPay|currency}}</td>
+            </tr>
+            <tr>
+              <td colspan="4">&nbsp;</td>
+            </tr>
+            <tr ng-hide="outstanding() == 0">
+              <th colspan="3" class="right">Outstanding</th>
+              <td class="right">£{{outstanding()|currency}}</td>
+            </tr>
+            <tr ng-show="outstanding() == 0">
+              <td colspan="4" class="right"><button class="button">Complete Transaction</button></td>
+            </tr>
+          </table>
+        </form>
+        
+      </div>
     </div>
   </div>
 </div>

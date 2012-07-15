@@ -7,3 +7,4 @@ console.log("c.get_stock_by_group('71')", c.get_stock_by_group('71'));
 console.log("c.get_stock_by_group('72', '02')", c.get_stock_by_group('72', '02'));
 console.log("c.get_stock_by_key1p2('0002')", c.get_stock_by_key1p2('0002'));
 console.log("c.get_stock_by_barcode('45678')", c.get_stock_by_barcode('45678'));
+console.log("c.get_stock_by_search('iPS')", c.get_stock_by_search('iPS'));

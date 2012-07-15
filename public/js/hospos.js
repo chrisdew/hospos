@@ -1,10 +1,10 @@
-$(function() {
-	console.log("DOM loaded");
-	$('#ng_view').on('keyup', '#itemInput', function(e) {
-		console.log("keyup", e);
-		window.itemInputOnKeyUp(e);
-	});
-});
+//$(function() {
+//	console.log("DOM loaded");
+//	$('#ng_view').on('keyup', '#itemInput', function(e) {
+//		console.log("keyup", e);
+//		window.itemInputOnKeyUp(e);
+//	});
+//});
 
 
 function InvoiceLine(ob) { 
@@ -18,10 +18,14 @@ InvoiceLine.prototype.lineTotal = function() {
 	return this.salprc_u * this.qty;
 }
 
-function CartCtrl($scope, $http) {
+function CartCtrl($scope, $http, $rootScope) {
+	
 	$scope.items = [
 	];
 	
+	// this controls popup picklist, when null, it is not displayed
+	$scope.picklist = null; 
+
 	$scope.itemInput = '';
 	$scope.validItem = null;
 	$scope.itemQty = 1;
@@ -38,6 +42,10 @@ function CartCtrl($scope, $http) {
 		return $scope.invoiceSubtotal() + $scope.invoiceVat();
 	}
 	
+	$scope.select = function(item) {
+		$rootScope.$broadcast('selectedStockItem', item);
+		$scope.picklist = null;
+	}
 
 	$scope.addItemToCart = function(item, qty) {
 		// if the item's already in the cart, just inc the qty
@@ -64,20 +72,18 @@ function CartCtrl($scope, $http) {
 		$scope.addItemToCart($scope.validItem, $scope.itemQty);
 	}
 	
-    window.itemInputOnKeyUp = function(e) {
-    	console.log("itemInputOnKeyUp", e);
-    	$scope.$apply(function() {
-    		if (e.keyCode === 13 && $scope.itemInput.length > 3) { // enter
+    $scope.itemInputOnKeyupEnter = function(e) {
+    	console.log("itemInputOnKeyupEnter", e);
+   		if ($scope.itemInput.length > 2) {
 console.log("DEBUG");
-                if (!$scope.validItem) {
-                	$scope.lookup();
-                } else {
-                	$scope.addItem();
-                }
-    		} else { //get rid of valid item
-    			$scope.validItem = null;
-    		}
-    	});
+            if (!$scope.validItem) {
+               	$scope.lookup();
+            } else {
+            	$scope.addItem();
+            }
+  		} else { //get rid of valid item
+   			$scope.validItem = null;
+   		}
     }
     
 
@@ -88,6 +94,13 @@ console.log("DEBUG");
     		if (items.length === 0) {
     			$http.get('/api/stock/barcode/' + $scope.itemInput + '/').success(function(items) {
     				console.log('as barcode', items);
+    				if (items.length === 0) {
+    					$http.get('/api/stock/search/' + $scope.itemInput + '/').success(function(items) {
+    	    				console.log('as F3 search', items);
+    	    				$scope.picklist = items;
+    	    				// display list of first 10 matching items
+    					});
+    				}
     				$scope.validItem = items[0];
     			});
     		} else {
@@ -102,6 +115,22 @@ console.log("DEBUG");
 	$scope.$on('selectedStockItem', function(e, item) {
 		$scope.addItemToCart(item, 1);
 	});
+}
+
+function OskCtrl($scope) {
+	$scope.pressed = function(key) {
+		console.log(key, 'pressed');
+		var input = $(window.oskInput);
+		var val = input.val();
+		if ( key === '-' || key === 0 || key === 1 || key === 2 || key === 3 || key === 4 
+		  || key === 5 || key === 6 || key === 7 || key === 8 || key === 9 || key === '.') {
+			input.val(val + key);
+		}
+		if (key === 'backspace' && val.length > 0) {
+			input.val(val.substring(0, val.length-1));
+		}
+		input.focus();
+	}
 }
 
 function StockGroupCtrl($scope, $http, $rootScope) {
@@ -173,7 +202,72 @@ function StockCtrl($scope, $http, $rootScope) {
 }
 
 
-function PaymentCtrl($scope, $http) {
+function PaymentCtrl($scope, $routeParams, $http) {
+    $scope.cash = { tendered: 0,
+                    change: 0,
+                    amount: function() {
+    	              return this.tendered - this.change;
+                    }
+                  };
+    $scope.card = { cardNo: undefined,
+                    expDate: undefined,
+                    amount: 0
+    			  }
+    $scope.cheque = { amount: 0 }
+    
+	$scope.totalToPay = parseInt($routeParams.totalToPay, 10);
+	
+	$scope.cashTenderedBlur = function() {
+		console.log('cashTenderedBlur');
+		if ($scope.cash.tendered > 0 && $scope.cash.change === 0 && $scope.outstanding() < 0) {
+			$scope.cash.change = -$scope.outstanding();
+		}
+	}
+	
+	/*
+	$scope.cashTenderedOnKeyUp = function() {
+		console.log('cashTenderedOnKeyUp', window.lastKeyEv);
+		if (window.lastKeyEv.keyCode === 13) {
+			// move to next input, if this one is valid
+		}
+	}
+	*/
+	
+	$scope.cashChangeBlur = function() {
+		if ($scope.cash.change > 0) {
+			$http.get('/api/till/open/');
+		}
+	}
+	
+	$scope.cardOnKeyupEnter = function() {
+		if ($scope.card.amount === 0) return true;
+		$scope.card.info = "Please insert card now.";
+		$scope.card.warning = undefined;
+		$scope.card.cardNo = undefined;
+		$scope.card.expDate = undefined;
+		// FIXME: should this be a POST to avoid caching?
+		$http.get('/api/card/read/' + $scope.card.amount + '/').success(function(data, status) {
+			$scope.card.info = data.info;
+			$scope.card.warning = data.warning;
+			$scope.card.cardNo = data.cardNo;
+			$scope.card.expDate = data.expDate;
+		});
+	}
+	
+	$scope.paymentTotal = function() {
+		return $scope.cash.amount() + ($scope.card.cardNo ? $scope.card.amount : 0) + $scope.cheque.amount;
+	}
+	$scope.outstanding = function() {
+		return $scope.totalToPay - $scope.paymentTotal();
+	}
 }
 
-
+function PaymentTypeCtrl($scope, $rootScope) {
+	$scope.types = [{name: 'Cash'},
+	                {name: 'Cheque'},
+	                {name: 'Card'}
+	                ];
+    $scope.select = function(type) {
+    	$rootScope.$broadcast('selectedPayementType', type);
+    }
+}

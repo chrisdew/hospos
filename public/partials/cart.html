@@ -1,6 +1,36 @@
 
 <div class="row">
   <div class="span5">
+  
+  	<div ng-controller="OskCtrl" id="osk_control">
+      <div class="bordered_box">
+        <table id="osk_table">
+          <tr>
+            <td><button class="touch" ng-click="pressed(7)">7</button></td>
+            <td><button class="touch" ng-click="pressed(8)">8</button></td>
+            <td><button class="touch" ng-click="pressed(9)">9</button></td>
+            <td><button class="touch" ng-click="pressed('-')">-</button></td>
+          </tr>
+          <tr>
+            <td><button class="touch" ng-click="pressed(4)">4</button></td>
+            <td><button class="touch" ng-click="pressed(5)">5</button></td>
+            <td><button class="touch" ng-click="pressed(6)">6</button></td>
+            <td><button class="touch" ng-click="pressed('backspace')"><-</button></td>
+          </tr>
+          <tr>
+            <td><button class="touch" ng-click="pressed(1)">1</button></td>
+            <td><button class="touch" ng-click="pressed(2)">2</button></td>
+            <td><button class="touch" ng-click="pressed(3)">3</button></td>
+            <td rowspan="2"><button class="touch doubleheight" ng-click="pressed('enter')">Enter</button></td>
+          </tr>
+          <tr>
+            <td colspan="2"><button class="touch doublewidth" ng-click="pressed(0)">0</button></td>
+            <td><button class="touch" ng-click="pressed('.')">.</button></td>
+          </tr>
+        </table>
+      </div>
+  	</div>
+  
     <div ng-controller="StockGroupCtrl" id="stock_group_control">
       <div class="bordered_box">
         <div>Stock Groups</div>
@@ -48,12 +78,12 @@
               <td>{{item.key1p2}}</td>
               <td>{{item.desc1}}</td>
               <td class="right">{{item.qty}}</td>
-              <td class="right">£{{item.salprc_u / 100}}</td>
-              <td class="right">£{{item.lineTotal() / 100}}</td>
+              <td class="right">£{{item.salprc_u|currency}}</td>
+              <td class="right">£{{item.lineTotal()|currency}}</td>
             </tr>
             <tr>
               <td colspan="1" id="itemInputTd">
-                <input autofocus id="itemInput" type="text" ng-model="itemInput" size="8" placeholder="add new item here">
+                <input autofocus osk-autofocus id="itemInput" osk on-keyup-enter-fn="itemInputOnKeyupEnter" type="text" ng-model="itemInput" size="8" placeholder="add new item here">
               </td>
               <td>
                 <span>{{validItem.desc1}}</span>
@@ -61,7 +91,7 @@
                 <input type="number" class="small" ng-model="itemQty" size="8" placeholder="qty">
               </td>
               <td class="right">
-                <span ng-show="validItem">£{{validItem.salprc_u / 100}}</span>
+                <span ng-show="validItem">£{{validItem.salprc_u|currency}}</span>
               </td>
               <td>
                 <input ng-show="validItem" class="btn-primary" type="submit" value="add">
@@ -70,20 +100,30 @@
             <tr>
               <td colspan="3">&nbsp;</td>
               <td class="right">Subtotal:</td>
-              <td class="right">£{{invoiceSubtotal() / 100;}}</td>
+              <td class="right">£{{invoiceSubtotal()|currency}}</td>
             </tr>
             <tr>
               <td colspan="3">&nbsp;</td>
               <td class="right">VAT:</td>
-              <td class="right">£{{invoiceVat() / 100;}}</td>
+              <td class="right">£{{invoiceVat()|currency}}</td>
             </tr>
             <tr>
               <td colspan="3">&nbsp;</td>
               <td class="right">Total Payable:</td>
-              <td class="right overlined">£{{invoiceTotal() / 100;}}</td>
+              <td class="right overlined">£{{invoiceTotal()|currency}}</td>
+            </tr>
+            <tr>
+              <td colspan="3">&nbsp;</td>
+              <td colspan="2" class="right"><a class="button" href="#/hospos/payment/{{invoiceTotal()}}">Pay</a</td>
             </tr>
           </table>
         </form>
+      </div>
+      <div ng-show="picklist" class="bordered_box popup">
+        <div>Stock Items</div>
+        <div class="ilb" ng-repeat="item in picklist">        
+          <button class="touch" ng-click="select(item)">{{item.key1p2}} {{item.desc1}}</button>
+        </div>
       </div>
     </div>
   </div>

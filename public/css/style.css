@@ -49,7 +49,28 @@ button.touch {
 	margin: 3px;
 }
 
+button.doublewidth {
+	width: 134px;
+}
 
+button.doubleheight {
+	height: 134px;
+}
+
+table#osk_table button {
+	margin: 2px;
+	margin-right: 3px;
+    margin-bottom: 3px;
+}
+
+div.popup {
+	position: absolute;
+	width: 60%;
+	height: 60%;
+	top: 20%;
+	left: 20%;
+	background: #fff;
+}
 
 
 

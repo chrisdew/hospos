@@ -77,8 +77,27 @@ app.get('/api/stock/groups/:prod_grp/items/', function(req, res) {
 app.get('/api/stock/barcode/:barcode/', function(req, res) {
 	res.send(cbackend.get_stock_by_barcode(req.params.barcode));
 });
+app.get('/api/stock/search/:query/', function(req, res) {
+	res.send(cbackend.get_stock_by_search(req.params.query));
+});
 app.get('/api/stock/:key1p2/', function(req, res) {
 	res.send(cbackend.get_stock_by_key1p2(req.params.key1p2));
+});
+app.get('/api/till/open/', function(req, res) {
+	res.send({till: 'open'});
+	console.log('\n******************\nTILL DRAWER OPENED\n******************\n');
+});
+app.get('/api/card/read/:amount/', function(req, res) {
+	console.log('\n************\nREADING CARD\n************\n');
+	setTimeout(function() {
+		if (Math.floor(Math.random()*3) === 0) {
+			res.send({warning: 'Card Declined', amount: 0});
+			console.log('\n*************\nCARD DECLINED\n*************\n');			
+		} else {
+			res.send({cardNo: '1234567890123456', expDate:'0314', amount: req.params.amount});
+			console.log('\n*********\nCARD READ\n*********\n');
+		}
+	}, 3000);
 });
 
 

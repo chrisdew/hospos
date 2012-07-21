@@ -5,15 +5,30 @@ function InvoiceLine(ob) {
 	}
 }
 
+InvoiceLine.prototype.lineType = 'stock';
+
 InvoiceLine.prototype.lineTotal = function() {
 	console.log("lineTotal");
 	return this.salprc_u * this.qty;
 }
 
+function NarrativeLine(narrative) { 
+	console.log("NarrativeLine");
+	this.narrative = narrative;
+}
+
+NarrativeLine.prototype.lineTotal = function() {
+	console.log("lineTotal");
+	return 0;
+}
+
+NarrativeLine.prototype.lineType = 'narrative';
+
 function CartCtrl($scope, $http, $rootScope) {
 	
 	$scope.items = [
 	];
+	window.items = $scope.items;
 	
 	// this controls popup picklist, when null, it is not displayed
 	$scope.picklist = null; 
@@ -23,11 +38,13 @@ function CartCtrl($scope, $http, $rootScope) {
 	$scope.itemQty = 1;
 	
 	$scope.invoiceSubtotal = function() {
-		return _.foldl($scope.items, function(memo, item) { return item.salprc_u * item.qty + memo; }, 0);
+		// TODO: refactor this, it's a mess
+		return _.foldl($scope.items, function(memo, item) { return item.salprc_u ? (item.salprc_u * item.qty + memo) : memo; }, 0);
 	}
 
 	$scope.invoiceVat = function() {
-		return _.foldl($scope.items, function(memo, item) { return (item.salprc_e - item.salprc_u) * item.qty + memo; }, 0);
+		// TODO: refactor this, it's a mess
+		return _.foldl($scope.items, function(memo, item) { return item.salprc_e ? ((item.salprc_e - item.salprc_u) * item.qty) : memo; }, 0);
 	}
 	
 	$scope.invoiceTotal = function() {
@@ -39,7 +56,7 @@ function CartCtrl($scope, $http, $rootScope) {
 		$scope.picklist = null;
 	}
 
-	$scope.addItemToCart = function(item, qty) {
+	var addItemToCart = function(item, qty) {
 		// if the item's already in the cart, just inc the qty
 		var matchingItem = _.find($scope.items, function(cartItem) { 
 			console.log('cartItem', cartItem, 'item', item);
@@ -54,24 +71,38 @@ function CartCtrl($scope, $http, $rootScope) {
 			$scope.items.push(line);
 			console.log(line);
 		}
-				
-		$scope.itemInput = '';
-		$scope.itemQty = 1;
-		$scope.validItem = null;
+		
+		clearInput();
 	}
 	
+	var addNarrativeToCart = function(narrative) {
+    	$scope.items.push(new NarrativeLine(narrative));		
+    	clearInput();
+	}
+	
+	function clearInput() {
+        $scope.itemInput = '';
+        $scope.itemQty = 1;
+        $scope.validItem = null;
+	}
+	
+
 	$scope.addItem = function() {
-		$scope.addItemToCart($scope.validItem, $scope.itemQty);
+		addItemToCart($scope.validItem, $scope.itemQty);
 	}
 	
     $scope.itemInputOnKeyupEnter = function(e) {
     	console.log("itemInputOnKeyupEnter", e);
    		if ($scope.itemInput.length > 2) {
 console.log("DEBUG");
-            if (!$scope.validItem) {
-               	$scope.lookup();
+            if ($scope.itemInput[0] == '!') {
+            	addNarrativeToCart($scope.itemInput);
             } else {
-            	$scope.addItem();
+            	if (!$scope.validItem) {
+            		$scope.lookup();
+            	} else {
+            		$scope.addItem();
+            	}
             }
   		} else { //get rid of valid item
    			$scope.validItem = null;
@@ -80,7 +111,7 @@ console.log("DEBUG");
     
 
 	$scope.lookup = function() {
-    	// first try it as a stock code
+    	// try it as a stock code
     	$http.get('/api/stock/' + $scope.itemInput + '/').success(function(items) {
     		console.log('as stock code', items);
     		if (items.length === 0) {

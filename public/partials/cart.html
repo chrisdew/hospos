@@ -75,11 +75,12 @@
               <th class="right">Price</th>
             </tr>
             <tr ng-repeat="item in items">
-              <td>{{item.key1p2}}</td>
-              <td>{{item.desc1}}</td>
-              <td class="right">{{item.qty}}</td>
-              <td class="right">£{{item.salprc_u|currency}}</td>
-              <td class="right">£{{item.lineTotal()|currency}}</td>
+              <td ngm-if="item.lineType=='narrative'" colspan="5">{{item.narrative}}</td>
+              <td ngm-if="item.lineType=='stock'">{{item.key1p2}}</td>
+              <td ngm-if="item.lineType=='stock'">{{item.desc1}}</td>
+              <td ngm-if="item.lineType=='stock'" class="right">{{item.qty}}</td>
+              <td ngm-if="item.lineType=='stock'" class="right">£{{item.salprc_u|currency}}</td>
+              <td ngm-if="item.lineType=='stock'" class="right">£{{item.lineTotal()|currency}}</td>
             </tr>
             <tr>
               <td colspan="1" id="itemInputTd">

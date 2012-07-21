@@ -53,6 +53,10 @@ button.doublewidth {
 	width: 134px;
 }
 
+button.quadwidth {
+	width: 270px;
+}
+
 button.doubleheight {
 	height: 134px;
 }

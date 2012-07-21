@@ -1,9 +1,12 @@
+window.state = {};
+
 var app = angular.module('hospos', []).
   config(['$routeProvider', function($routeProvider) {
   $routeProvider.
-      when('/hospos', {templateUrl: 'partials/cart.html',   controller: CartCtrl}).
-      when('/hospos/payment/:totalToPay', {templateUrl: 'partials/payment.html', controller: PaymentCtrl}).
-      otherwise({redirectTo: '/hospos'});
+      when('/hospos/user', {templateUrl: 'partials/user.html',   controller: UserCtrl}).
+      when('/hospos/:user/cart/', {templateUrl: 'partials/cart.html',   controller: CartCtrl}).
+      when('/hospos/:user/payment/:totalToPay', {templateUrl: 'partials/payment.html', controller: PaymentCtrl}).
+      otherwise({redirectTo: '/hospos/user'});
 }]);
   
 app.directive('onFocus', function() {
@@ -206,3 +209,35 @@ app.directive('oskAutofocus', function() {
     };        
 });
 
+app.directive('ngmIf', function () {
+    return {
+        transclude:'element',
+        priority:1000,
+        terminal:true,
+        compile:function (element, attr, linker) {
+            return function (scope, iterStartElement, attr) {
+                iterStartElement[0].doNotMove = true;
+                var expression = attr.ngmIf;
+                var lastElement;
+                var lastScope;
+                scope.$watch(expression, function (newValue) {
+                    if (lastElement) {
+                        lastElement.remove();
+                        lastElement = null;
+                    }
+                    lastScope && lastScope.$destroy();
+                    if (newValue) {
+                        lastScope = scope.$new();
+                        linker(lastScope, function (clone) {
+                            lastElement = clone;
+                            iterStartElement.after(clone);
+                        });
+                    }
+                    // Note: need to be parent() as jquery cannot trigger events on comments
+                    // (angular creates a comment node when using transclusion, as ng-repeat does).
+                    //iterStartElement.parent().trigger("$childrenChanged");
+                });
+            };
+        }
+    };
+});

@@ -1,0 +1,14 @@
+
+
+<div class="row">
+  <div class="span4">
+    <div ng-controller="UserCtrl" id="user_control">
+      <div class="bordered_box">
+        <div>Users:</div>
+        <div class="" ng-repeat="user in users">
+          <button class="touch quadwidth" ng-click="select(user)">{{user.name}}, {{user.notes}}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

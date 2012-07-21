@@ -1,5 +1,39 @@
 window.state = {};
 
+window.state.users = [
+   {name: 'Rod', 
+	perms: [CAN_SELL_OUT_OF_STOCK_ITEM,
+	        CAN_ACCEPT_CHEQUES,
+	        ONSCREEN_NUMPAD,
+	        CAN_SELL_ALCOHOL,
+	        ALLOW_LINE_DISCOUNT,
+	        ALLOW_INVOICE_DISCOUNT
+	        ],
+	notes: 'All permissions, on-screen numpad.'},
+   {name: 'Jane', 
+	perms: [CAN_SELL_OUT_OF_STOCK_ITEM,
+	        CAN_ACCEPT_CHEQUES,
+	        CAN_SELL_ALCOHOL,
+	        ALLOW_LINE_DISCOUNT,
+	        ALLOW_INVOICE_DISCOUNT
+	        ],
+	notes: 'All permissions.'},
+   {name: 'Freddy', 
+	perms: [],
+	notes: 'No permissions.'}
+];
+
+function setUser(username) {
+	console.log("setUser", username)
+	for (var i = 0; i < window.state.users.length ; i++) {
+		if (window.state.users[i].name === username) {
+			window.state.user = window.state.users[i];
+			console.log("user:", window.state.user);
+			break;
+		}
+	}
+}
+
 var app = angular.module('hospos', []).
   config(['$routeProvider', function($routeProvider) {
   $routeProvider.

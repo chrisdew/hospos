@@ -1,6 +1,11 @@
 
 
-function PaymentCtrl($scope, $routeParams, $http) {
+function PaymentCtrl($scope, $routeParams, $http, $routeParams) {
+	
+	setUser($routeParams.user);
+	$scope.user = window.state.user;
+	$scope.showCheque = _.indexOf($scope.user.perms, CAN_ACCEPT_CHEQUES) === -1 ? false : true;
+
     $scope.cash = { tendered: 0,
                     change: 0,
                     amount: function() {

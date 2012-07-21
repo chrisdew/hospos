@@ -7,27 +7,8 @@ var ALLOW_INVOICE_DISCOUNT = 'ALLOW_INVOICE_DISCOUNT';
 	                                      
 
 function UserCtrl($scope, $location) {
-	$scope.users = [{name: 'Rod', 
-					 perms: [CAN_SELL_OUT_OF_STOCK_ITEM,
-	                         CAN_ACCEPT_CHEQUES,
-	                         ONSCREEN_NUMPAD,
-	                         CAN_SELL_ALCOHOL,
-	                         ALLOW_LINE_DISCOUNT,
-	                         ALLOW_INVOICE_DISCOUNT
-	                         ],
-	                 notes: 'All permissions, on-screen numpad.'},
-	                {name: 'Jane', 
-	                 perms: [CAN_SELL_OUT_OF_STOCK_ITEM,
-	                         CAN_ACCEPT_CHEQUES,
-		                     CAN_SELL_ALCOHOL,
-		                     ALLOW_LINE_DISCOUNT,
-		                     ALLOW_INVOICE_DISCOUNT
-	                         ],
-	                 notes: 'All permissions.'},
-	                {name: 'Freddy', 
-	                 perms: [],
-	                 notes: 'No permissions.'}
-	                ];
+	$scope.users = window.state.users;
+
     $scope.select = function(user) {
     	window.state.user = user;
     	$location.url('/hospos/' + user.name + '/cart');

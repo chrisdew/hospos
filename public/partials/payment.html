@@ -2,6 +2,7 @@
 
 <div class="row">
   <div class="span4">
+    <!--
     <div ng-controller="PaymentTypeCtrl" id="payment_type_control">
       <div class="bordered_box">
         <div>Payment Types:</div>
@@ -10,8 +11,37 @@
         </div>
       </div>
     </div>
+    -->
+  	<div ng-controller="OskCtrl" id="osk_control">
+      <div class="bordered_box">
+        <table id="osk_table">
+          <tr>
+            <td><button class="touch" ng-click="pressed(7)">7</button></td>
+            <td><button class="touch" ng-click="pressed(8)">8</button></td>
+            <td><button class="touch" ng-click="pressed(9)">9</button></td>
+            <td><button class="touch" ng-click="pressed('-')">-</button></td>
+          </tr>
+          <tr>
+            <td><button class="touch" ng-click="pressed(4)">4</button></td>
+            <td><button class="touch" ng-click="pressed(5)">5</button></td>
+            <td><button class="touch" ng-click="pressed(6)">6</button></td>
+            <td><button class="touch" ng-click="pressed('backspace')"><-</button></td>
+          </tr>
+          <tr>
+            <td><button class="touch" ng-click="pressed(1)">1</button></td>
+            <td><button class="touch" ng-click="pressed(2)">2</button></td>
+            <td><button class="touch" ng-click="pressed(3)">3</button></td>
+            <td rowspan="2"><button class="touch doubleheight" ng-click="pressed('enter')">Enter</button></td>
+          </tr>
+          <tr>
+            <td colspan="2"><button class="touch doublewidth" ng-click="pressed(0)">0</button></td>
+            <td><button class="touch" ng-click="pressed('.')">.</button></td>
+          </tr>
+        </table>
+      </div>
+  	</div>
   </div>
-
+  
   <div class="span8">
     <div ng-controller="PaymentCtrl">
       <div class="bordered_box">
@@ -25,10 +55,10 @@
             <tr>
               <td>Cash</td>
               <td class="right">Tendered: £&nbsp;
-	            <input type="text" autofocus class="small" on-keyup-enter-fn render-on-blur on-blur="cashTenderedBlur()" ng-model="cash.tendered" name="cash_tendered" currency />
+	            <input osk-autofocus osk type="text" autofocus class="small" on-keyup-enter-fn render-on-blur on-blur="cashTenderedBlur()" ng-model="cash.tendered" name="cash_tendered" currency />
               </td>
               <td class="right">Change: £&nbsp;
-                <input class="small" type="text" on-keyup-enter-fn on-blur="cashChangeBlur()" ng-model="cash.change" name="cash_change" currency />
+                <input osk class="small" type="text" on-keyup-enter-fn on-blur="cashChangeBlur()" ng-model="cash.change" name="cash_change" currency />
               </td>
               <td class="right">£{{cash.amount()|currency}}</td>
             </tr>
@@ -40,11 +70,11 @@
                 <span ng-show="card.cardNo">Card No.: {{card.cardNo}}</span>
                 <span ng-show="card.expDate">Expiry Date: {{card.expDate}}</span>
               </td>
-              <td class="right">£&nbsp;<input on-keyup-enter-fn="cardOnKeyupEnter" class="small" type="text" ng-model="card.amount" size="8" name="card_amount" currency></td>
+              <td class="right">£&nbsp;<input osk on-keyup-enter-fn="cardOnKeyupEnter" class="small" type="text" ng-model="card.amount" size="8" name="card_amount" currency></td>
             </tr>
-            <tr>
+            <tr ng-show="showCheque">
               <td colspan="3">Cheque</td>
-              <td class="right">£&nbsp;<input class="small" on-keyup-enter-fn type="text" ng-model="cheque.amount" size="8" name="cheque_amount" currency></td>
+              <td class="right">£&nbsp;<input osk class="small" on-keyup-enter-fn type="text" ng-model="cheque.amount" size="8" name="cheque_amount" currency></td>
             </tr>
             <tr>
               <th colspan="3" class="right">Total Payments</th>

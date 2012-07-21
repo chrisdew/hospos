@@ -24,7 +24,11 @@ NarrativeLine.prototype.lineTotal = function() {
 
 NarrativeLine.prototype.lineType = 'narrative';
 
-function CartCtrl($scope, $http, $rootScope) {
+	var timeout = false;
+function CartCtrl($scope, $http, $rootScope, $routeParams) {
+	
+	setUser($routeParams.user);
+	$scope.user = window.state.user;
 	
 	$scope.items = [
 	];
@@ -56,7 +60,18 @@ function CartCtrl($scope, $http, $rootScope) {
 		$scope.picklist = null;
 	}
 
-	function validQty(item, qty) {
+	// FIXME: see http://stackoverflow.com/questions/11591902/angularjs-can-a-on-method-be-called-more-than-once-for-a-single-broadcast
+	function debounced_alert(str) {
+		if (!timeout) {
+			console.log("debounced_alert fire", this);
+			timeout = setTimeout(function() { timeout = false; }, 4000);
+			alert(str);
+		} else {
+			console.log("debounced_alert forget");
+		}
+	}
+
+	$scope.validQty = function(item, qty) {
 		console.log("validQty", qty, item);
 		if (qty > item.b_each) {
 			console.log("too much");
@@ -67,13 +82,31 @@ function CartCtrl($scope, $http, $rootScope) {
 					return true;
 				}
 			}
-			alert("not enough stock");
+			debounced_alert("not enough stock");
+			console.log("not enough stock");
 			return false;
 		}
 		return true;
 	}
 
-	var addItemToCart = function(item, qty) {
+    $scope.validSalesPerson = function(item) {
+    	console.log("validSalesPerson");
+    	if (item.prod_grp === '76') {
+			if (window.state && window.state.user && window.state.user.perms) {
+				console.log("perms found");
+				if (_.indexOf(window.state.user.perms, CAN_SELL_ALCOHOL) !== -1) {
+					console.log("return true");
+					return true;
+				}
+			}
+			debounced_alert("you cannot sell alcohol, as you are not 18");
+			return false;
+    	}
+    	return true;
+    }
+
+	$scope.addItemToCart = function(item, qty) {
+		console.log("addItemToCart", item, qty);
 		// if the item's already in the cart, just inc the qty
 		var matchingItem = _.find($scope.items, function(cartItem) { 
 			console.log('cartItem', cartItem, 'item', item);
@@ -82,13 +115,13 @@ function CartCtrl($scope, $http, $rootScope) {
 		console.log('matchingItem', matchingItem)
 		if (matchingItem) {
 			// TODO: refactor
-			if (!validQty(item, matchingItem.qty + qty)) {
+			if (!$scope.validQty(item, matchingItem.qty + qty) || !$scope.validSalesPerson(item)) {
 				return;
 			}
 			matchingItem.qty += qty;
 		} else {
 			// TODO: refactor
-			if (!validQty(item, qty)) {
+			if (!$scope.validQty(item, qty) || !$scope.validSalesPerson(item)) {
 				return;
 			}
 			var line = new InvoiceLine(item);
@@ -113,7 +146,7 @@ function CartCtrl($scope, $http, $rootScope) {
 	
 
 	$scope.addItem = function() {
-		addItemToCart($scope.validItem, $scope.itemQty);
+		$scope.addItemToCart($scope.validItem, $scope.itemQty);
 	}
 	
     $scope.itemInputOnKeyupEnter = function(e) {
@@ -161,9 +194,19 @@ console.log("DEBUG");
 
 
 	$scope.$on('selectedStockItem', function(e, item) {
+		if (!window.counter) {
+			console.log("first call");
+			window.counter = 1;
+		} else {
+			console.log("call", window.counter);
+			window.counter++;
+			//throw "second_call";
+		}
+		console.log('selectedStockItem');
 		$scope.addItemToCart(item, 1);
 	});
 	$scope.$on('selectedStockItem2', function(e, item) {
+		console.log('selectedStockItem2');
 		$('#itemInput').focus();
 		$scope.validItem = item;
 		$scope.itemInput = item.key1p2;
@@ -250,6 +293,7 @@ function StockCtrl($scope, $http, $rootScope) {
     	}
     });
     $scope.select = function(item) {
+    	console.log('broadcast selectedStockItem', item);
     	$rootScope.$broadcast('selectedStockItem', item);
     }
 }

@@ -28,7 +28,7 @@ function CartCtrl($scope, $http, $rootScope) {
 	
 	$scope.items = [
 	];
-	window.items = $scope.items;
+	//window.items = $scope.items;
 	
 	// this controls popup picklist, when null, it is not displayed
 	$scope.picklist = null; 
@@ -56,6 +56,23 @@ function CartCtrl($scope, $http, $rootScope) {
 		$scope.picklist = null;
 	}
 
+	function validQty(item, qty) {
+		console.log("validQty", qty, item);
+		if (qty > item.b_each) {
+			console.log("too much");
+			if (window.state && window.state.user && window.state.user.perms) {
+				console.log("perms found");
+				if (_.indexOf(window.state.user.perms, CAN_SELL_OUT_OF_STOCK_ITEM) !== -1) {
+					console.log("return true");
+					return true;
+				}
+			}
+			alert("not enough stock");
+			return false;
+		}
+		return true;
+	}
+
 	var addItemToCart = function(item, qty) {
 		// if the item's already in the cart, just inc the qty
 		var matchingItem = _.find($scope.items, function(cartItem) { 
@@ -64,8 +81,16 @@ function CartCtrl($scope, $http, $rootScope) {
 		});
 		console.log('matchingItem', matchingItem)
 		if (matchingItem) {
+			// TODO: refactor
+			if (!validQty(item, matchingItem.qty + qty)) {
+				return;
+			}
 			matchingItem.qty += qty;
 		} else {
+			// TODO: refactor
+			if (!validQty(item, qty)) {
+				return;
+			}
 			var line = new InvoiceLine(item);
 			line.qty = qty;
 			$scope.items.push(line);

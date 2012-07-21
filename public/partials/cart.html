@@ -1,6 +1,6 @@
 
 <div class="row">
-  <div class="span5">
+  <div class="span4">
   
   	<div ng-controller="OskCtrl" id="osk_control">
       <div class="bordered_box">
@@ -62,7 +62,7 @@
     </div>
   </div>
 
-  <div class="span7">
+  <div class="span8">
     <div ng-controller="CartCtrl">
       <div class="bordered_box">
         <form ng-submit="addItem()">
@@ -87,7 +87,8 @@
                 <input autofocus osk-autofocus id="itemInput" osk on-keyup-enter-fn="itemInputOnKeyupEnter" type="text" ng-model="itemInput" size="8" placeholder="add new item here">
               </td>
               <td>
-                <span>{{validItem.desc1}}</span>
+                <span ng-show="validItem">{{validItem.desc1}}</span>
+                <span ng-show="validItem">({{validItem.b_each}} in stock)</span>
               <td class="right">
                 <input type="number" class="small" ng-model="itemQty" size="8" placeholder="qty">
               </td>

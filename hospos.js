@@ -99,6 +99,10 @@ app.get('/api/card/read/:amount/', function(req, res) {
 		}
 	}, 3000);
 });
+app.post('/api/invoice/complete/', function(req, res) {
+	console.log('\n******************\nINVOICE COMPLETED\n******************\n');
+	console.log(req.body)
+});
 
 
 // start express listening

@@ -2,7 +2,7 @@
 <div class="row">
   <div class="span4">
   
-  	<div ng-controller="OskCtrl" id="osk_control">
+  	<div ng-controller="OskCtrl" id="osk_control" ng-show="onscreenNumpad()">
       <div class="bordered_box">
         <table id="osk_table">
           <tr>
@@ -72,6 +72,7 @@
               <th class="left">Description</th>
               <th class="right">Quantity</th>
               <th class="right">Unit Price</th>
+              <th ng-show="allowLineDiscount()" class="right">Discount</th>
               <th class="right">Price</th>
             </tr>
             <tr ng-repeat="item in items">
@@ -80,6 +81,7 @@
               <td ngm-if="item.lineType=='stock'">{{item.desc1}}</td>
               <td ngm-if="item.lineType=='stock'" class="right">{{item.qty}}</td>
               <td ngm-if="item.lineType=='stock'" class="right">£{{item.salprc_u|currency}}</td>
+              <td ng-show="allowLineDiscount()" ngm-if="item.lineType=='stock'" class="right">£{{item.lineDiscount|currency}}</td>
               <td ngm-if="item.lineType=='stock'" class="right">£{{item.lineTotal()|currency}}</td>
             </tr>
             <tr>
@@ -95,28 +97,35 @@
               <td class="right">
                 <span ng-show="validItem">£{{validItem.salprc_u|currency}}</span>
               </td>
+              <td ng-show="allowLineDiscount()" class="right">
+                <input type="number" class="small" currency ng-model="lineDiscount" size="8" placeholder="discount">
+              </td>
               <td>
-                <input ng-show="validItem" class="btn-primary" type="submit" value="add">
+                <input ng-show="validItem" class="button" type="submit" value="Add">
               </td>
             </tr>
             <tr>
               <td colspan="3">&nbsp;</td>
+              <td ng-show="allowLineDiscount()">&nbsp;</td>
               <td class="right">Subtotal:</td>
               <td class="right">£{{invoiceSubtotal()|currency}}</td>
             </tr>
             <tr>
               <td colspan="3">&nbsp;</td>
+              <td ng-show="allowLineDiscount()">&nbsp;</td>
               <td class="right">VAT:</td>
               <td class="right">£{{invoiceVat()|currency}}</td>
             </tr>
             <tr>
               <td colspan="3">&nbsp;</td>
+              <td ng-show="allowLineDiscount()">&nbsp;</td>
               <td class="right">Total Payable:</td>
               <td class="right overlined">£{{invoiceTotal()|currency}}</td>
             </tr>
             <tr>
               <td colspan="3">&nbsp;</td>
-              <td colspan="2" class="right"><a class="button" href="#/hospos/{{user.name}}/payment/{{invoiceTotal()}}">Pay</a</td>
+              <td ng-show="allowLineDiscount()">&nbsp;</td>
+              <td colspan="2" class="right"><a class="button" href="#/hospos/{{user.name}}/payment/{{invoiceTotal()}}">Pay</a></td>
             </tr>
           </table>
         </form>

@@ -9,7 +9,20 @@ InvoiceLine.prototype.lineType = 'stock';
 
 InvoiceLine.prototype.lineTotal = function() {
 	console.log("lineTotal");
-	return this.salprc_u * this.qty;
+	return this.salprc_u * this.qty - this.lineDiscount;
+}
+
+InvoiceLine.prototype.goods = function() {
+	console.log("goods");
+	return this.salprc_u * this.qty - this.lineDiscount;
+}
+
+InvoiceLine.prototype.vat = function() {
+	console.log("vat");
+	var vat = (this.salprc_e - this.salprc_u) * this.qty;
+	var vatRate = this.salprc_e / this.salprc_u - 1;
+	console.log("vatRate", vatRate);
+	return Math.floor(vat - this.lineDiscount * vatRate);
 }
 
 function NarrativeLine(narrative) { 
@@ -24,7 +37,7 @@ NarrativeLine.prototype.lineTotal = function() {
 
 NarrativeLine.prototype.lineType = 'narrative';
 
-	var timeout = false;
+var timeout = false;
 function CartCtrl($scope, $http, $rootScope, $routeParams) {
 	
 	setUser($routeParams.user);
@@ -32,7 +45,7 @@ function CartCtrl($scope, $http, $rootScope, $routeParams) {
 	
 	$scope.items = [
 	];
-	//window.items = $scope.items;
+	window.state.items = $scope.items;
 	
 	// this controls popup picklist, when null, it is not displayed
 	$scope.picklist = null; 
@@ -40,15 +53,23 @@ function CartCtrl($scope, $http, $rootScope, $routeParams) {
 	$scope.itemInput = '';
 	$scope.validItem = null;
 	$scope.itemQty = 1;
+	$scope.lineDiscount = 0;
 	
 	$scope.invoiceSubtotal = function() {
 		// TODO: refactor this, it's a mess
-		return _.foldl($scope.items, function(memo, item) { return item.salprc_u ? (item.salprc_u * item.qty + memo) : memo; }, 0);
+		return _.foldl($scope.items, function(memo, item) { return item.salprc_u ? (item.salprc_u * item.qty - item.lineDiscount + memo) : memo; }, 0);
 	}
 
 	$scope.invoiceVat = function() {
 		// TODO: refactor this, it's a mess
-		return _.foldl($scope.items, function(memo, item) { return item.salprc_e ? ((item.salprc_e - item.salprc_u) * item.qty) : memo; }, 0);
+		//return _.foldl($scope.items, function(memo, item) { return item.salprc_e ? ((item.salprc_e - item.salprc_u) * item.qty - (item.salprc_u - item.salprc_e) * item.lineDiscount) : memo; }, 0);
+		return _.foldl($scope.items, function(memo, item) { 
+			if (!item.salprc_e) return memo;
+			var vat = (item.salprc_e - item.salprc_u) * item.qty;
+			var vatRate = item.salprc_e / item.salprc_u - 1;
+			console.log("vatRate", vatRate);
+			return vat - item.lineDiscount * vatRate + memo;
+		}, 0);
 	}
 	
 	$scope.invoiceTotal = function() {
@@ -89,6 +110,28 @@ function CartCtrl($scope, $http, $rootScope, $routeParams) {
 		return true;
 	}
 
+	$scope.allowLineDiscount = function() {
+		if (window.state && window.state.user && window.state.user.perms) {
+			console.log("perms found");
+			if (_.indexOf(window.state.user.perms, ALLOW_LINE_DISCOUNT) !== -1) {
+				console.log("return true");
+				return true;
+			}
+		}
+		return false;
+	}
+
+	$scope.onscreenNumpad = function() {
+		if (window.state && window.state.user && window.state.user.perms) {
+			console.log("perms found");
+			if (_.indexOf(window.state.user.perms, ONSCREEN_NUMPAD) !== -1) {
+				console.log("return true");
+				return true;
+			}
+		}
+		return false;
+	}
+	
     $scope.validSalesPerson = function(item) {
     	console.log("validSalesPerson");
     	if (item.prod_grp === '76') {
@@ -105,7 +148,7 @@ function CartCtrl($scope, $http, $rootScope, $routeParams) {
     	return true;
     }
 
-	$scope.addItemToCart = function(item, qty) {
+	$scope.addItemToCart = function(item, qty, lineDiscount) {
 		console.log("addItemToCart", item, qty);
 		// if the item's already in the cart, just inc the qty
 		var matchingItem = _.find($scope.items, function(cartItem) { 
@@ -119,6 +162,9 @@ function CartCtrl($scope, $http, $rootScope, $routeParams) {
 				return;
 			}
 			matchingItem.qty += qty;
+			if (lineDiscount) {
+				matchingItem.lineDiscount += lineDiscount;
+			}
 		} else {
 			// TODO: refactor
 			if (!$scope.validQty(item, qty) || !$scope.validSalesPerson(item)) {
@@ -126,6 +172,11 @@ function CartCtrl($scope, $http, $rootScope, $routeParams) {
 			}
 			var line = new InvoiceLine(item);
 			line.qty = qty;
+			if (lineDiscount) {
+				line.lineDiscount = lineDiscount;
+			} else {
+				line.lineDiscount = 0;				
+			}
 			$scope.items.push(line);
 			console.log(line);
 		}
@@ -142,11 +193,13 @@ function CartCtrl($scope, $http, $rootScope, $routeParams) {
         $scope.itemInput = '';
         $scope.itemQty = 1;
         $scope.validItem = null;
+        $scope.lineDiscount = 0;
+        $('itemInput').focus();
 	}
 	
 
 	$scope.addItem = function() {
-		$scope.addItemToCart($scope.validItem, $scope.itemQty);
+		$scope.addItemToCart($scope.validItem, $scope.itemQty, $scope.lineDiscount);
 	}
 	
     $scope.itemInputOnKeyupEnter = function(e) {

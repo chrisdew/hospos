@@ -2,7 +2,8 @@
 
 <div class="row">
   <div class="span4">
-    <!--
+  	<div>&nbsp;</div>
+    <!-- 
     <div ng-controller="PaymentTypeCtrl" id="payment_type_control">
       <div class="bordered_box">
         <div>Payment Types:</div>
@@ -11,7 +12,6 @@
         </div>
       </div>
     </div>
-    -->
   	<div ng-controller="OskCtrl" id="osk_control">
       <div class="bordered_box">
         <table id="osk_table">
@@ -40,12 +40,13 @@
         </table>
       </div>
   	</div>
+    -->
   </div>
   
   <div class="span8">
     <div ng-controller="PaymentCtrl">
       <div class="bordered_box">
-        <form name="form" ng-submit="addItem()">
+        <form name="form"">
           <table style="width: 100%;">
             <tr>
               <th class="left">Payment Type</th>
@@ -70,11 +71,15 @@
                 <span ng-show="card.cardNo">Card No.: {{card.cardNo}}</span>
                 <span ng-show="card.expDate">Expiry Date: {{card.expDate}}</span>
               </td>
-              <td class="right">£&nbsp;<input osk on-keyup-enter-fn="cardOnKeyupEnter" class="small" type="text" ng-model="card.amount" size="8" name="card_amount" currency></td>
+              <td class="right">£&nbsp;<input osk render-on-blur on-keyup-enter-fn="cardOnKeyupEnter" class="small" type="text" ng-model="card.amount" size="8" name="card_amount" currency></td>
             </tr>
             <tr ng-show="showCheque">
               <td colspan="3">Cheque</td>
-              <td class="right">£&nbsp;<input osk class="small" on-keyup-enter-fn type="text" ng-model="cheque.amount" size="8" name="cheque_amount" currency></td>
+              <td class="right">£&nbsp;<input osk render-on-blur class="small" on-keyup-enter-fn type="text" ng-model="cheque.amount" size="8" name="cheque_amount" currency></td>
+            </tr>
+            <tr ng-show="allowInvoiceDiscount()">
+              <td colspan="3">Discount</td>
+              <td class="right">£&nbsp;<input osk render-on-blur class="small" on-keyup-enter-fn type="text" ng-model="discount.amount" size="8" name="discount_amount" currency></td>
             </tr>
             <tr>
               <th colspan="3" class="right">Total Payments</th>
@@ -92,7 +97,7 @@
               <td class="right">£{{outstanding()|currency}}</td>
             </tr>
             <tr ng-show="outstanding() == 0">
-              <td colspan="4" class="right"><button class="button">Complete Transaction</button></td>
+              <td colspan="4" class="right"><a class="button" ng-click="complete()">Complete</a></td>
             </tr>
           </table>
         </form>

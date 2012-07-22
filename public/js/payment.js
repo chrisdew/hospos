@@ -17,6 +17,7 @@ function PaymentCtrl($scope, $routeParams, $http, $routeParams) {
                     amount: 0
     			  }
     $scope.cheque = { amount: 0 }
+    $scope.discount = { amount: 0 }
     
 	$scope.totalToPay = parseInt($routeParams.totalToPay, 10);
 	
@@ -25,6 +26,17 @@ function PaymentCtrl($scope, $routeParams, $http, $routeParams) {
 		if ($scope.cash.tendered > 0 && $scope.cash.change === 0 && $scope.outstanding() < 0) {
 			$scope.cash.change = -$scope.outstanding();
 		}
+	}
+	
+	$scope.allowInvoiceDiscount = function() {
+		if (window.state && window.state.user && window.state.user.perms) {
+			console.log("perms found");
+			if (_.indexOf(window.state.user.perms, ALLOW_INVOICE_DISCOUNT) !== -1) {
+				console.log("return true");
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/*
@@ -58,10 +70,22 @@ function PaymentCtrl($scope, $routeParams, $http, $routeParams) {
 	}
 	
 	$scope.paymentTotal = function() {
-		return $scope.cash.amount() + ($scope.card.cardNo ? $scope.card.amount : 0) + $scope.cheque.amount;
+		return $scope.cash.amount() + ($scope.card.cardNo ? $scope.card.amount : 0) + $scope.cheque.amount + $scope.discount.amount;
 	}
 	$scope.outstanding = function() {
-		return $scope.totalToPay - $scope.paymentTotal();
+		var outstanding = $scope.totalToPay - $scope.paymentTotal();
+		if (outstanding < 0.5 && outstanding > -0.5) return 0;
+		return outstanding;
+	}
+	
+	$scope.complete = function() {
+		console.log("completing invoice");
+
+		var invoice = createInvoice("000001", window.state.items, $scope.totalToPay, {cash: $scope.cash, card: $scope.card, cheque: $scope.cheque, discount: $scope.discount});
+
+		$http.post('/api/invoice/complete/', invoice).success(function(data, status) {
+			alert("invoice completed");
+		});
 	}
 }
 
@@ -71,6 +95,6 @@ function PaymentTypeCtrl($scope, $rootScope) {
 	                {name: 'Card'}
 	                ];
     $scope.select = function(type) {
-    	$rootScope.$broadcast('selectedPayementType', type);
+    	$rootScope.$broadcast('selectedPaymentType', type);
     }
 }

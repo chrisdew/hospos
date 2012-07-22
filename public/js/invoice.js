@@ -1,4 +1,45 @@
-var t1 = {
+function klone(ob) {
+	return JSON.parse(JSON.stringify(ob));
+}
+
+function createInvoice(trno, lines, payments) {
+	var invoice = [];
+	var goods = 0;
+	var vat = 0;
+	for (i in lines) {
+		var line = lines[i];
+		if (line.lineType === 'stock') {
+			invoice.push(createT2(trno));
+			invoice.push(createT4(trno));
+			invoice.push(createT5(trno));
+			goods += line.goods();
+			vat += line.vat();
+		} else {
+			invoice.push(createT2fromNarrative(trno, line.narrative));
+		}
+		invoice.push(createT1(trno, new Date().getTime() / 1000, [goods,0,0,0,0,0,0,0,0,0], [vat,0,0,0,0,0,0,0,0,0]));
+		invoice.push(createT3(trno));
+	}
+	return invoice;
+}
+
+function createT1(trno, trdt, gvl /*array*/, vat /*array*/, cshv, chng, ccdv, idvl) {
+	var t1 = klone(T1);
+	t1.trno = trno;
+	t1.trdt = trdt;
+	for (var i = 0; i < 10; i++) {
+		t1['gvl' + i] = gvl[i];
+		t1['vat' + i] = vat[i];
+	}
+	t1.cshv = cshv;
+	t1.chng = chng;
+	t1.ccdv = ccdv;
+	t1.idvl = idvl;
+	return t1;
+}
+
+var T1 = {
+  type:   't1',
   blank:  0,          // multipoint
   trno:   '000001',
   trty:   '1',        // sales and returns
@@ -81,7 +122,26 @@ var t1 = {
   eor2:     0         // end of MUP9 record
 }
 
-var t2 = {
+function createT2(trno) {
+	var t2 = klone(T2);
+	t2.trno = trno;
+	t2.rtyp = 0;
+	t2.rind = 0;
+	return t2;
+}
+
+function createT2fromNarrative(trno, narrative) {
+	var t2 = klone(T2);
+	t2.trno = trno;
+	t2.rtyp = 2;
+	t2.rind = 4;
+	t2.code = narrative.substr(0,22);
+	t2.pgrp = narrative.substr(22,6);
+	return t2;
+}
+
+var T2 = {
+  type:   't2',
   brch:     'smo',
   sttn:     1,        // station no
   trno:     '000001',
@@ -106,7 +166,16 @@ var t2 = {
   eor2:     0
 }
 
-var t3 = {
+
+function createT3(tno) {
+	var t3 = klone(T3);
+	t3.tno = tno;
+	t3.invcrn = tno;
+	return t3;
+}
+
+var T3 = {
+  type:   't3',
   tno:      '000001',
   invcrn:   '000001',
   deladdr:  '',
@@ -133,7 +202,15 @@ var t3 = {
   eor2:     0
 }
 
-var t4 = {
+function createT4(tno) {
+	var t4 = klone(T4);
+	t4.tno = tno;
+	t4.invcrn = tno;
+	return t4;
+}
+
+var T4 = {
+  type:     't4',
   tno:      '000001',
   linevat:  '999',
   linedisc: '999',
@@ -150,7 +227,15 @@ var t4 = {
   eor2:     0
 }
 
-var t5 = {
+function createT5(tno) {
+	var t5 = klone(T5);
+	t5.tno = tno;
+	t5.invcrn = tno;
+	return t5;
+}
+
+var T5 = {
+  type:     't5',
   trno:     '000001',
   lineno:   '999',
   code:     '',         // stock code
